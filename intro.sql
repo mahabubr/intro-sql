@@ -357,3 +357,45 @@ FROM employee e
     FULL JOIN department d ON e.deptid = d.deptid
 GROUP BY d.name
 HAVING AVG(e.salary) > 65000;
+
+-- ## Sub Queries
+
+SELECT *
+FROM employee
+WHERE salary = (
+        SELECT max(salary)
+        FROM employee
+    );
+
+SELECT *
+FROM employee
+WHERE salary IN (
+        SELECT salary
+        FROM employee
+        WHERE name LIKE '%a%'
+    );
+
+SELECT *
+FROM employee
+WHERE salary > (
+        SELECT avg(salary)
+        FROM employee
+    );
+
+SELECT email, (
+        SELECT avg(salary)
+        FROM employee
+    )
+FROM employee;
+
+SELECT deptid, avg_salary
+FROM (
+        SELECT
+            deptid,
+            avg(salary) as avg_salary
+        FROM employee
+        GROUP BY
+            deptid
+    ) as tempTable;
+
+JOIN department d ON d.dept_id = deptID;
