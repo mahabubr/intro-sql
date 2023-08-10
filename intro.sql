@@ -399,3 +399,70 @@ FROM (
     ) as tempTable;
 
 JOIN department d ON d.dept_id = deptID;
+
+-- ## Views
+
+CREATE VIEW view_name AS SELECT name FROM employee;
+
+SELECT * FROM view_name;
+
+-- ## Stored Procedures and Functions
+
+CREATE PROCEDURE DEACTIVATE_UNPAID_ACCOUNT() LANGUAGE 
+SQL AS 
+$$ 
+    UPDATE UPDATE accounts SET account = FALSE WHERE balance = 0 
+$$;
+
+CALL DEACTIVATE_UNPAID_ACCOUNT();
+
+CREATE FUNCTION ACCOUNT_TYPE_COUNT(ACCOUNT_TYPE TEXT
+) RETURNS INT 
+LANGUAGE plpgsql AS 
+$$
+    DECLARE account_count INT;
+    BEGIN
+        SELECT count(*) INTO account_count FROM accounts WHERE account.account_type = $1;
+        RETURN account_count;
+    END;
+$$;
+
+
+-- ## Triggers 
+CREATE TABLE products(
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    base_price FLOAT8 NOT NULL,
+    final_price FLOAT8
+);
+
+INSERT INTO products VALUES(1, 'Mango', 55);
+
+SELECT * FROM products;
+
+CREATE TRIGGER add_tax_trigger
+AFTER INSERT ON products
+FOR EACH ROW
+EXECUTE FUNCTION update_final_price();
+
+CREATE OR REPLACE FUNCTION update_final_price()
+RETURNS TRIGGER LANGUAGE PLPGSQL  AS
+$$
+    BEGIN
+    -- NEW, OLD
+        NEW.final_price := NEW.base_price * 1.05;
+        RETURN NEW;
+    END;
+$$;
+
+-- ## Indexing and Optimization
+
+SELECT * FROM employee;
+
+EXPLAIN ANALYSE SELECT empid  FROM employee;
+
+CREATE INDEX name_idx ON employee(name);
+
+EXPLAIN ANALYSE SELECT empid  FROM employee WHERE name = 'Emma Davis';
+
+EXPLAIN ANALYSE SELECT empid  FROM employee WHERE name LIKE '%emm%';
